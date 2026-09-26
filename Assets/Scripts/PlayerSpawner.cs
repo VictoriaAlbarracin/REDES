@@ -18,4 +18,5 @@ public class PlayerSpawner : SimulationBehaviour, IPlayerJoined
             Runner.Spawn(_playerPrefab, spawnPoint.position, spawnPoint.rotation);
         }
     }
+
 }
