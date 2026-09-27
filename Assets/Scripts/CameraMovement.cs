@@ -9,7 +9,6 @@ public class CameraMovement : MonoBehaviour
     {
         _target = target;
     }
-
     private void LateUpdate()
     {
         if (!_target) return;

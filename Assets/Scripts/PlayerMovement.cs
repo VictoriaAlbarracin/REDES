@@ -17,12 +17,15 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] float _jumpForce;
     [SerializeField] LayerMask _groundLayer;
 
-    [SerializeField] private GameObject _bulletPrefab;  //bala
+    [SerializeField] Bullet _bulletPrefab;  //bala
+    [SerializeField] Transform _bulletSpawnPoint;
 
     int _currentLife;
     Vector2 _moveDir;
     bool _isJumpPressed;
     int _jumpsPerformed;
+
+    bool _isFirePressed;
 
     public event Action<float> onMovement;
     public override void Spawned()
@@ -34,28 +37,29 @@ public class PlayerMovement : NetworkBehaviour
     }
     public override void Render() //funciona como un update y chequea si se presiono la tecla y le avisa al fixedupdate
     {
+        if (!HasStateAuthority) return;
+
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
            _isJumpPressed = true;
         }
+
+        if (Keyboard.current.enterKey.wasPressedThisFrame) _isFirePressed = true;
     }
 
-    /*void Update() //miau
+    void Update() //miau
     {
-        _horizontalAxi = Input.GetAxis("Horizontal"); //no se por q tira error estoy siguiendo los bloques ....
+       // _horizontalAxi = Input.GetAxis("Horizontal"); //no se por q tira error estoy siguiendo los bloques ....
     }
 
     private void FixedUpdate()
     {
-        transform.position += Vector3.forward * (_horizontalAxi * Time.fixedDeltaTime); //tira error... no c 
-    }*/
-
-
-
+       // transform.position += Vector3.forward * (_horizontalAxi * Time.fixedDeltaTime); //tira error... no c 
+    }
 
     public override void FixedUpdateNetwork() //usa callback
     {
-        bool isGrounded = Physics.Raycast(transform.position, Vector3.down, 1.1f, _groundLayer);
+        bool isGrounded = Physics.Raycast(transform.position, Vector3.down, 0.1f, _groundLayer); //si el float es muy grande va a hacer doble saltos
         if (isGrounded)
         {
             _jumpsPerformed = 0;
@@ -73,6 +77,12 @@ public class PlayerMovement : NetworkBehaviour
                 _jumpsPerformed++;
             }
             _isJumpPressed = false;
+        }
+
+        if (_isFirePressed)
+        {
+            Shoot();
+            _isFirePressed= false;
         }
 
         void Movement(float moveX)
@@ -102,6 +112,10 @@ public class PlayerMovement : NetworkBehaviour
         }
     }
 
+    void Shoot()
+    {
+        Runner.Spawn(_bulletPrefab, _bulletSpawnPoint.position, _bulletSpawnPoint.rotation);
+    }
     public void RPC_TakeDamage(int dmg)
     {
         _currentLife -= dmg;
