@@ -28,6 +28,10 @@ public class Bullet : NetworkBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!HasStateAuthority) return;
+        if(other.TryGetComponent(out PlayerMovement player))
+        {
+            player.RPC_TakeDamage(_dmg);
+        }
 
         Runner.Despawn(Object);
     }

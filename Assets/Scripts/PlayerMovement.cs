@@ -17,10 +17,15 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] float _jumpForce;
     [SerializeField] LayerMask _groundLayer;
 
+    [Header("Disparo")]
     [SerializeField] Bullet _bulletPrefab;  //bala
     [SerializeField] Transform _bulletSpawnPoint;
 
-    int _currentLife;
+    [Networked, OnChangedRender(nameof(CurrentLifeChanged))]
+    int CurrentLife {  get; set; }
+
+    void CurrentLifeChanged() => Debug.Log(CurrentLife); //por ahora solo un debug
+
     Vector2 _moveDir;
     bool _isJumpPressed;
     int _jumpsPerformed;
@@ -33,7 +38,7 @@ public class PlayerMovement : NetworkBehaviour
         if (HasStateAuthority)
             Camera.main.GetComponent<CameraMovement>().SetTarget(transform);
 
-       _currentLife = _maxLife;
+       CurrentLife = _maxLife;
     }
     public override void Render() //funciona como un update y chequea si se presiono la tecla y le avisa al fixedupdate
     {
@@ -82,7 +87,7 @@ public class PlayerMovement : NetworkBehaviour
         if (_isFirePressed)
         {
             Shoot();
-            _isFirePressed= false;
+            _isFirePressed = false;
         }
 
         void Movement(float moveX)
@@ -111,26 +116,25 @@ public class PlayerMovement : NetworkBehaviour
             _networkRigidbody.Rigidbody.AddForce(Vector3.up * _jumpForce, ForceMode.VelocityChange);
         }
     }
-
     void Shoot()
     {
         Runner.Spawn(_bulletPrefab, _bulletSpawnPoint.position, _bulletSpawnPoint.rotation);
     }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)] //que cualquiera lo pueda llamar, que solo el que tenga autoridad lo pueda ejecutar
     public void RPC_TakeDamage(int dmg)
     {
-        _currentLife -= dmg;
+        CurrentLife -= dmg;
 
-        if (_currentLife <= 0)
+        if (CurrentLife <= 0)
         {
-            Dead();
+            Death();
         }
     }
-
-    void Dead()
+    void Death()
     {
         Runner.Despawn(Object);
     }
-
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
     }
