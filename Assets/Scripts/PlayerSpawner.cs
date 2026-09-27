@@ -13,7 +13,7 @@ public class PlayerSpawner : SimulationBehaviour, IPlayerJoined
         if (player == Runner.LocalPlayer)
         {
             var playerIndex = Runner.SessionInfo.PlayerCount-1;
-            var spawnPoint = _spawnPoint[playerIndex];
+            var spawnPoint = _spawnPoint[playerIndex % _spawnPoint.Count];
 
             Runner.Spawn(_playerPrefab, spawnPoint.position, spawnPoint.rotation);
         }

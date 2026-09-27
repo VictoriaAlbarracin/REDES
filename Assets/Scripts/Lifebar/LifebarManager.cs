@@ -22,7 +22,7 @@ public class LifebarManager : MonoBehaviour
         player.onDead += () =>
         {
             _lifebarInUse.Remove(newLifebar);
-            Destroy(newLifebar);
+            Destroy(newLifebar.gameObject);
         };
     }
     private void LateUpdate()

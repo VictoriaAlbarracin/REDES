@@ -66,9 +66,12 @@ public class PlayerMovement : NetworkBehaviour
         LifebarManager.Instance.CreateLifebar(this);
 
         if (HasStateAuthority)
+        {
+            CurrentLife = _maxLife;
             Camera.main.GetComponent<CameraMovement>().SetTarget(transform);
+        }
 
-       CurrentLife = _maxLife;
+        CurrentLifeChanged();
     }
     public override void Render() //funciona como un update y chequea si se presiono la tecla, avisandole al fixedupdate
     {
