@@ -40,7 +40,7 @@ public class PlayerMovement : NetworkBehaviour
         }
     }
 
-    void Update() //miau
+    /*void Update() //miau
     {
         _horizontalAxi = Input.GetAxis("Horizontal"); //no se por q tira error estoy siguiendo los bloques ....
     }
@@ -48,7 +48,7 @@ public class PlayerMovement : NetworkBehaviour
     private void FixedUpdate()
     {
         transform.position += Vector3.forward * (_horizontalAxi * Time.fixedDeltaTime); //tira error... no c 
-    }
+    }*/
 
 
 
