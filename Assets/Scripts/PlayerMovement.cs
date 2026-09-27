@@ -20,18 +20,34 @@ public class PlayerMovement : NetworkBehaviour
     [Header("Dash")]
     [SerializeField] float _dashForce;
     [SerializeField] float _dashDuration;
+    [SerializeField] float _dashCooldown;
     float _dashTimer;
     float _dashDir;
+    float _currentDashCooldown;
     bool _isDashing;
+
+    [Header("Escudo")]
+    [SerializeField] float _shieldDuration = 2f;
+    [SerializeField] float _shieldCooldown = 6f;
+    float _shieldTimer;
+    float _currentShieldCooldown;
 
     [Header("Disparo")]
     [SerializeField] Bullet _bulletPrefab;  //bala
     [SerializeField] Transform _bulletSpawnPoint;
 
+    // sincroniza la vida en la red
     [Networked, OnChangedRender(nameof(CurrentLifeChanged))]
     int CurrentLife {  get; set; }
 
-    void CurrentLifeChanged() => Debug.Log(CurrentLife); //por ahora solo un debug
+    // Sincroniza el estado del escudo en la red (para que todos sepan si tenes el escudo o no)
+    [Networked] public NetworkBool IsShielded { get; set; }
+
+    void CurrentLifeChanged()
+    {
+        onLifeUpdated?.Invoke(CurrentLife/(float)_maxLife);
+       Debug.Log(CurrentLife); //por ahora solo un debug
+    }
 
     Vector2 _moveDir;
     bool _isJumpPressed;
@@ -39,16 +55,22 @@ public class PlayerMovement : NetworkBehaviour
 
     bool _isFirePressed;
     bool _isDashPresed;
+    bool _isShieldPressed;
 
+    //EVENTOS
     public event Action<float> onMovement;
+    public event Action<float> onLifeUpdated;
+    public event Action onDead;
     public override void Spawned()
     {
+        LifebarManager.Instance.CreateLifebar(this);
+
         if (HasStateAuthority)
             Camera.main.GetComponent<CameraMovement>().SetTarget(transform);
 
        CurrentLife = _maxLife;
     }
-    public override void Render() //funciona como un update y chequea si se presiono la tecla y le avisa al fixedupdate
+    public override void Render() //funciona como un update y chequea si se presiono la tecla, avisandole al fixedupdate
     {
         if (!HasStateAuthority) return;
 
@@ -60,6 +82,8 @@ public class PlayerMovement : NetworkBehaviour
         if (Keyboard.current.enterKey.wasPressedThisFrame) _isFirePressed = true;
 
         if (Keyboard.current.leftShiftKey.wasPressedThisFrame) _isDashPresed = true;
+
+        if (Keyboard.current.eKey.wasPressedThisFrame) _isShieldPressed = true;
     }
 
     void Update() //miau
@@ -84,6 +108,10 @@ public class PlayerMovement : NetworkBehaviour
         float correctedX = -_moveDir.x;
         Movement(correctedX);
 
+        if (_currentDashCooldown > 0) _currentDashCooldown -= Runner.DeltaTime;
+        if (_currentShieldCooldown > 0) _currentShieldCooldown -= Runner.DeltaTime;
+
+
         if (_isJumpPressed)
         {
             if (_jumpsPerformed < _maxJumps)
@@ -102,9 +130,13 @@ public class PlayerMovement : NetworkBehaviour
 
         if (_isDashPresed)
         {
-            Dash();
+            if (_currentDashCooldown <= 0 && !_isDashing)
+            {
+                Dash();
+            }
             _isDashPresed = false;
         }
+
         if (_isDashing)
         {
             _dashTimer -= Runner.DeltaTime;
@@ -118,6 +150,25 @@ public class PlayerMovement : NetworkBehaviour
                 _networkRigidbody.Rigidbody.linearVelocity = Vector3.zero;
                 _isDashing = false;
             } 
+        }
+
+        if (_isShieldPressed)
+        {
+            if (_currentShieldCooldown <= 0 && !IsShielded)
+            {
+                ActivateShield();
+            }
+            _isShieldPressed = false;
+        }
+
+        if (IsShielded)
+        {
+            _shieldTimer -= Runner.DeltaTime;
+
+            if (_shieldTimer <= 0)
+            {
+                IsShielded = false;
+            }
         }
 
         void Movement(float moveX)
@@ -154,12 +205,23 @@ public class PlayerMovement : NetworkBehaviour
     {
         _isDashing = true;
         _dashTimer = _dashDuration;
+        _currentDashCooldown = _dashCooldown;
         _dashDir = transform.right.x;
     }
 
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)] //que cualquiera lo pueda llamar, que solo el que tenga autoridad lo pueda ejecutar
+    void ActivateShield()
+    {
+        IsShielded = true;
+        _shieldTimer = _shieldDuration;
+        _currentShieldCooldown = _shieldCooldown;
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)] //que cualquiera lo pueda llamar(source), que solo el que tenga autoridad lo pueda ejecutar (target)
     public void RPC_TakeDamage(int dmg)
     {
+        if (IsShielded)
+            return;
+
         CurrentLife -= dmg;
 
         if (CurrentLife <= 0)
@@ -167,11 +229,13 @@ public class PlayerMovement : NetworkBehaviour
             Death();
         }
     }
+
     void Death()
     {
         Runner.Despawn(Object);
     }
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
+        onDead?.Invoke();
     }
 }

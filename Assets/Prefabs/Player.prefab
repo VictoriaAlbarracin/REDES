@@ -74,7 +74,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _moveAction: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   _networkRigidbody: {fileID: 228936030421229115}
-  _speed: 5
+  _speed: 7
   _maxLife: 50
   _maxJumps: 1
   _jumpForce: 5
@@ -83,8 +83,13 @@ MonoBehaviour:
     m_Bits: 8
   _dashForce: 20
   _dashDuration: 0.2
+  _dashCooldown: 3
+  _shieldDuration: 2
+  _shieldCooldown: 6
   _bulletPrefab: {fileID: 900493916220162808, guid: 3bb62081e20805146a4909337c4a0f33, type: 3}
   _bulletSpawnPoint: {fileID: 6017860524831879830}
+  _IsShielded:
+    _value: 0
 --- !u!114 &228936030421229115
 MonoBehaviour:
   m_ObjectHideFlags: 0
