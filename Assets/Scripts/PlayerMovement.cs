@@ -17,6 +17,8 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] float _jumpForce;
     [SerializeField] LayerMask _groundLayer;
 
+    [SerializeField] private GameObject _bulletPrefab;  //bala
+
     int _currentLife;
     Vector2 _moveDir;
     bool _isJumpPressed;
@@ -37,6 +39,20 @@ public class PlayerMovement : NetworkBehaviour
            _isJumpPressed = true;
         }
     }
+
+    void Update() //miau
+    {
+        _horizontalAxi = Input.GetAxis("Horizontal"); //no se por q tira error estoy siguiendo los bloques ....
+    }
+
+    private void FixedUpdate()
+    {
+        transform.position += Vector3.forward * (_horizontalAxi * Time.fixedDeltaTime); //tira error... no c
+    }
+
+
+
+
     public override void FixedUpdateNetwork() //usa callback
     {
         bool isGrounded = Physics.Raycast(transform.position, Vector3.down, 1.1f, _groundLayer);
