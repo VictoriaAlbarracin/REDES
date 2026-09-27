@@ -47,7 +47,7 @@ public class PlayerMovement : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        transform.position += Vector3.forward * (_horizontalAxi * Time.fixedDeltaTime); //tira error... no c
+        transform.position += Vector3.forward * (_horizontalAxi * Time.fixedDeltaTime); //tira error... no c 
     }
 
 
