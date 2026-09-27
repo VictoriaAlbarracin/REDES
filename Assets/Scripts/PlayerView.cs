@@ -1,16 +1,25 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
+
 public class PlayerView : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    Animator _animator;
+
+    IPlayerEvents _playerEvents;
+
+    private void Awake()
     {
-        
+        _animator = GetComponent<Animator>();
+
+        _playerEvents = GetComponentInParent<IPlayerEvents>();
+
+        if (_playerEvents is null) return;
+        _playerEvents.onMovement += SetMovementParameter;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetMovementParameter(float xAxi)
     {
-        
+        _animator.SetFloat("axi", xAxi);    
     }
 }

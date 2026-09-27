@@ -4,7 +4,7 @@ using Fusion;
 using Fusion.Addons.Physics;
 using UnityEngine;
 using UnityEngine.InputSystem;
-public class PlayerMovement : NetworkBehaviour
+public class PlayerMovement : NetworkBehaviour, IPlayerEvents 
 {
     [Header ("Configuraciones del Player")]
     [SerializeField] InputActionReference _moveAction;
@@ -80,6 +80,8 @@ public class PlayerMovement : NetworkBehaviour
     public event Action<float> onMovement;
     public event Action<float> onLifeUpdated;
     public event Action onDead;
+    public event Action onShot;
+
     public override void Spawned()
     {
         LifebarManager.Instance.CreateLifebar(this);
@@ -195,7 +197,7 @@ public class PlayerMovement : NetworkBehaviour
 
         void Movement(float moveX)
         {
-            onMovement?.Invoke(moveX);
+            onMovement?.Invoke(_moveDir.x); //invoca evento
 
             if (moveX != 0)
                 transform.right = Vector3.right * Mathf.Sign(moveX);
