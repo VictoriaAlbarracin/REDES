@@ -27,6 +27,7 @@ public class PlayerMovement : NetworkBehaviour
     bool _isDashing;
 
     [Header("Escudo")]
+    [SerializeField] GameObject _shieldVisual;
     [SerializeField] float _shieldDuration = 2f;
     [SerializeField] float _shieldCooldown = 6f;
     float _shieldTimer;
@@ -41,12 +42,30 @@ public class PlayerMovement : NetworkBehaviour
     int CurrentLife {  get; set; }
 
     // Sincroniza el estado del escudo en la red (para que todos sepan si tenes el escudo o no)
-    [Networked] public NetworkBool IsShielded { get; set; }
+    [Networked, OnChangedRender(nameof(OnShieldStateChanged))]
+    public NetworkBool IsShielded { get; set; }
 
     void CurrentLifeChanged()
     {
         onLifeUpdated?.Invoke(CurrentLife/(float)_maxLife);
        Debug.Log(CurrentLife); //por ahora solo un debug
+    }
+    void OnShieldStateChanged()
+    {
+        if (IsShielded)
+        {
+            Debug.Log($"[{Object.Id}] escudo activado");
+        }
+        else
+        {
+            Debug.Log($"[{Object.Id}] escudo desactivado");
+        }
+
+        //prender y apagar el objeto
+        if (_shieldVisual != null)
+        {
+            _shieldVisual.SetActive(IsShielded);
+        }
     }
 
     Vector2 _moveDir;
