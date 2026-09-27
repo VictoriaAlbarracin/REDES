@@ -2239,6 +2239,7 @@ GameObject:
   - component: {fileID: 8827236878092177469}
   - component: {fileID: 9010045140540793286}
   - component: {fileID: 977830122815715626}
+  - component: {fileID: 8778466256581720488}
   m_Layer: 0
   m_Name: T_Pose
   m_TagString: Untagged
@@ -2297,6 +2298,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad757224bc74d8b45880be1e89cd28a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8778466256581720488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8199776741730404999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 506319458, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Animator: {fileID: 9010045140540793286}
+  ApplyTiming: 2
+  SyncSettings: 79
+  StateHashes: 
+  TriggerHashes: 
+  TotalWords: 0
 --- !u!1 &8253417771930179640
 GameObject:
   m_ObjectHideFlags: 0

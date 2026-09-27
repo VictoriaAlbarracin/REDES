@@ -1,16 +1,17 @@
+using Fusion;
 using UnityEngine;
 
-[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(NetworkMecanimAnimator))]
 
 public class PlayerView : MonoBehaviour
 {
-    Animator _animator;
+    NetworkMecanimAnimator _mecanim;
 
     IPlayerEvents _playerEvents;
 
     private void Awake()
     {
-        _animator = GetComponent<Animator>();
+        _mecanim = GetComponent<NetworkMecanimAnimator>();
 
         _playerEvents = GetComponentInParent<IPlayerEvents>();
 
@@ -20,6 +21,6 @@ public class PlayerView : MonoBehaviour
 
     public void SetMovementParameter(float xAxi)
     {
-        _animator.SetFloat("Axi", Mathf.Abs(xAxi));    //tipo un modulo para q siempre sea positivo
+        _mecanim.Animator.SetFloat("Axi", Mathf.Abs(xAxi));    //tipo un modulo para q siempre sea positivo
     }
 }
