@@ -17,6 +17,13 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] float _jumpForce;
     [SerializeField] LayerMask _groundLayer;
 
+    [Header("Dash")]
+    [SerializeField] float _dashForce;
+    [SerializeField] float _dashDuration;
+    float _dashTimer;
+    float _dashDir;
+    bool _isDashing;
+
     [Header("Disparo")]
     [SerializeField] Bullet _bulletPrefab;  //bala
     [SerializeField] Transform _bulletSpawnPoint;
@@ -31,6 +38,7 @@ public class PlayerMovement : NetworkBehaviour
     int _jumpsPerformed;
 
     bool _isFirePressed;
+    bool _isDashPresed;
 
     public event Action<float> onMovement;
     public override void Spawned()
@@ -50,6 +58,8 @@ public class PlayerMovement : NetworkBehaviour
         }
 
         if (Keyboard.current.enterKey.wasPressedThisFrame) _isFirePressed = true;
+
+        if (Keyboard.current.leftShiftKey.wasPressedThisFrame) _isDashPresed = true;
     }
 
     void Update() //miau
@@ -90,6 +100,26 @@ public class PlayerMovement : NetworkBehaviour
             _isFirePressed = false;
         }
 
+        if (_isDashPresed)
+        {
+            Dash();
+            _isDashPresed = false;
+        }
+        if (_isDashing)
+        {
+            _dashTimer -= Runner.DeltaTime;
+
+            var velocity = _networkRigidbody.Rigidbody.linearVelocity;
+            velocity.x = _dashDir * _dashForce;
+            _networkRigidbody.Rigidbody.linearVelocity = velocity;
+
+            if (_dashTimer <= 0)
+            {
+                _networkRigidbody.Rigidbody.linearVelocity = Vector3.zero;
+                _isDashing = false;
+            } 
+        }
+
         void Movement(float moveX)
         {
             onMovement?.Invoke(moveX);
@@ -119,6 +149,12 @@ public class PlayerMovement : NetworkBehaviour
     void Shoot()
     {
         Runner.Spawn(_bulletPrefab, _bulletSpawnPoint.position, _bulletSpawnPoint.rotation);
+    }
+    void Dash()
+    {
+        _isDashing = true;
+        _dashTimer = _dashDuration;
+        _dashDir = transform.right.x;
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)] //que cualquiera lo pueda llamar, que solo el que tenga autoridad lo pueda ejecutar
