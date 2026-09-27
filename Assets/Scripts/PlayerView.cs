@@ -20,6 +20,6 @@ public class PlayerView : MonoBehaviour
 
     public void SetMovementParameter(float xAxi)
     {
-        _animator.SetFloat("axi", xAxi);    
+        _animator.SetFloat("Axi", xAxi);    
     }
 }

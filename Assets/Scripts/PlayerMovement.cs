@@ -197,19 +197,25 @@ public class PlayerMovement : NetworkBehaviour, IPlayerEvents
 
         void Movement(float moveX)
         {
-            onMovement?.Invoke(_moveDir.x); //invoca evento
+            
 
             if (moveX != 0)
-                transform.right = Vector3.right * Mathf.Sign(moveX);
+                if (moveX != 0)
+                    transform.right = Vector3.right * Mathf.Sign(moveX);
 
-            _networkRigidbody.Rigidbody.linearVelocity += Vector3.right * (moveX * 10 * Runner.DeltaTime * _speed);
+            _networkRigidbody.Rigidbody.linearVelocity +=
+                Vector3.right * (moveX * 10 * Runner.DeltaTime * _speed);
 
-            if (Math.Abs(_networkRigidbody.Rigidbody.linearVelocity.x) <= _speed)
-                return;
+            var velocity = _networkRigidbody.Rigidbody.linearVelocity;
 
-            var newVelocity = _networkRigidbody.Rigidbody.linearVelocity;
-            newVelocity.x = _speed * moveX;
-            _networkRigidbody.Rigidbody.linearVelocity = newVelocity;
+            if (Mathf.Abs(velocity.x) > _speed)
+            {
+                velocity.x = _speed * Mathf.Sign(velocity.x);
+                _networkRigidbody.Rigidbody.linearVelocity = velocity;
+            }
+
+            onMovement?.Invoke(moveX);
+
         }
 
         void Jump()
