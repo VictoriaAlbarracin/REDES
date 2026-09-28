@@ -76,6 +76,8 @@ public class PlayerMovement : NetworkBehaviour, IPlayerEvents
     bool _isDashPresed;
     bool _isShieldPressed;
 
+    bool _isDead;
+
     //EVENTOS
     public event Action<float> onMovement;
     public event Action<float> onLifeUpdated;
@@ -197,8 +199,6 @@ public class PlayerMovement : NetworkBehaviour, IPlayerEvents
 
         void Movement(float moveX)
         {
-            
-
             if (moveX != 0)
                 if (moveX != 0)
                     transform.right = Vector3.right * Mathf.Sign(moveX);
@@ -262,6 +262,9 @@ public class PlayerMovement : NetworkBehaviour, IPlayerEvents
 
     void Death()
     {
+        if (_isDead) return;
+        _isDead = true;
+        MatchManager.Instance.RPC_PlayerDied(Object.StateAuthority);
         Runner.Despawn(Object);
     }
     public override void Despawned(NetworkRunner runner, bool hasState)
