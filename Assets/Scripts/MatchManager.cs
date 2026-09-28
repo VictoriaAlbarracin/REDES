@@ -11,7 +11,7 @@ public class MatchManager : NetworkBehaviour
     [SerializeField] GameObject _waitingCanvas;
 
     bool _gameFinished;
-
+    public bool GameFinished => _gameFinished;
     [Networked]
     public NetworkBool GameStarted { get; set; }
     public override void Spawned()
