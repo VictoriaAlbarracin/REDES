@@ -1,3 +1,4 @@
+using System.Linq;
 using Fusion;
 using UnityEngine;
 
@@ -7,14 +8,41 @@ public class MatchManager : NetworkBehaviour
 
     [SerializeField] GameObject _victoryCanvas;
     [SerializeField] GameObject _defeatCanvas;
+    [SerializeField] GameObject _waitingCanvas;
 
     bool _gameFinished;
 
+    [Networked]
+    public NetworkBool GameStarted { get; set; }
     public override void Spawned()
     {
         Instance = this;
         _victoryCanvas.SetActive(false);
         _defeatCanvas.SetActive(false);
+        _waitingCanvas.SetActive(false);
+    }
+    public override void FixedUpdateNetwork()
+    {
+        if (GameStarted || _gameFinished)
+            return;
+
+        int playerCount = 0;
+
+        foreach (PlayerRef player in Runner.ActivePlayers)
+        {
+            playerCount++;
+        }
+
+        if (playerCount >= 2)
+        {
+            GameStarted = true;
+            Debug.Log("¡Los 2 jugadores están conectados! Comienza la partida.");
+        }
+    }
+    public override void Render()
+    {
+        if (_waitingCanvas != null)
+            _waitingCanvas.SetActive(!GameStarted && !_gameFinished);
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]

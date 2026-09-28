@@ -124,6 +124,9 @@ public class PlayerMovement : NetworkBehaviour, IPlayerEvents
 
     public override void FixedUpdateNetwork() //usa callback
     {
+        if (!MatchManager.Instance.GameStarted)
+            return;
+
         bool isGrounded = Physics.Raycast(transform.position, Vector3.down, 0.1f, _groundLayer); //si el float es muy grande va a hacer doble saltos
         if (isGrounded)
         {
